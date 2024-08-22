@@ -52,17 +52,26 @@ namespace NModbus.Transport.IP
                 logger.LogInformation("Starting " + nameof(ModbusTcpServerNetworkTransport) + " with secure endpoint on {Endpoint}", tcpListener.LocalEndpoint);
             }
 
-            tcpListener.Start();
-
-            using (cancellationToken.Register(() => tcpListener?.Stop()))
+            try
             {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    var tcpClient = await tcpListener.AcceptTcpClientAsync()
-                        .ConfigureAwait(false);
+                tcpListener.Start();
 
-                    await StartClientProcessing(tcpClient, cancellationToken);
+                using (cancellationToken.Register(() => tcpListener?.Stop()))
+                {
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        var tcpClient = await tcpListener.AcceptTcpClientAsync()
+                            .ConfigureAwait(false);
+
+                        await StartClientProcessing(tcpClient, cancellationToken);
+                    }
                 }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
 
